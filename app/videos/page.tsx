@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
+import ConfirmationModal from "@/components/ConfirmationModal";
 import Link from "next/link";
 
 interface Video {
@@ -23,6 +24,15 @@ export default function VideosPage() {
   const [error, setError] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [loadingTranscript, setLoadingTranscript] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    video: Video | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    video: null,
+    isLoading: false,
+  });
 
   useEffect(() => {
     if (user) {
@@ -95,6 +105,63 @@ export default function VideosPage() {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+    });
+  };
+
+  const handleDeleteClick = (video: Video) => {
+    setDeleteModal({
+      isOpen: true,
+      video,
+      isLoading: false,
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteModal.video) return;
+
+    setDeleteModal((prev) => ({ ...prev, isLoading: true }));
+
+    try {
+      const response = await fetch(
+        `/api/videos?videoId=${deleteModal.video._id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete video");
+      }
+
+      // Remove the video from the local state
+      setVideos((prev) =>
+        prev.filter((video) => video._id !== deleteModal.video!._id)
+      );
+
+      // Close the modal
+      setDeleteModal({
+        isOpen: false,
+        video: null,
+        isLoading: false,
+      });
+
+      // Show success message (optional)
+      setError(""); // Clear any existing errors
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : "Failed to delete video");
+      setDeleteModal((prev) => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({
+      isOpen: false,
+      video: null,
+      isLoading: false,
     });
   };
 
@@ -317,21 +384,44 @@ export default function VideosPage() {
                         <p className="text-sm text-gray-500 mb-3">
                           Transcribed on {formatDate(video.createdAt)}
                         </p>
-                        <div className="flex space-x-2">
+                        <div className="space-y-2">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() =>
+                                fetchVideoWithTranscript(video._id)
+                              }
+                              className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm"
+                            >
+                              View Transcript
+                            </button>
+                            <a
+                              href={video.videoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 bg-gray-600 text-white px-3 py-2 rounded-md hover:bg-gray-700 transition-colors text-sm text-center"
+                            >
+                              Watch Video
+                            </a>
+                          </div>
                           <button
-                            onClick={() => fetchVideoWithTranscript(video._id)}
-                            className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm"
+                            onClick={() => handleDeleteClick(video)}
+                            className="w-full bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition-colors text-sm flex items-center justify-center"
                           >
-                            View Transcript
+                            <svg
+                              className="w-4 h-4 mr-2"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                            Delete Video
                           </button>
-                          <a
-                            href={video.videoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 bg-gray-600 text-white px-3 py-2 rounded-md hover:bg-gray-700 transition-colors text-sm text-center"
-                          >
-                            Watch Video
-                          </a>
                         </div>
                       </div>
                     </div>
@@ -417,6 +507,19 @@ export default function VideosPage() {
               </div>
             </div>
           )}
+
+          {/* Delete Confirmation Modal */}
+          <ConfirmationModal
+            isOpen={deleteModal.isOpen}
+            onClose={handleDeleteCancel}
+            onConfirm={handleDeleteConfirm}
+            title="Delete Video"
+            message={`Are you sure you want to delete "${deleteModal.video?.videoTitle}"? This action cannot be undone and will permanently remove the video and its transcript from your library.`}
+            confirmText="Delete Video"
+            cancelText="Cancel"
+            isLoading={deleteModal.isLoading}
+            type="danger"
+          />
         </div>
       </div>
     </div>
