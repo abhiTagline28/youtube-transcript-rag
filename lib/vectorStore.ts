@@ -20,10 +20,20 @@ let vectorStore: Chroma | null = null;
 
 export async function getVectorStore(): Promise<Chroma> {
   if (!vectorStore) {
-    vectorStore = await Chroma.fromExistingCollection(embeddings, {
-      collectionName: "youtube-transcripts",
-      url: process.env.CHROMA_URL || "http://localhost:8000",
-    });
+    try {
+      // Try to connect to existing collection
+      vectorStore = await Chroma.fromExistingCollection(embeddings, {
+        collectionName: "youtube-transcripts",
+        url: process.env.CHROMA_URL || "http://localhost:8000",
+      });
+    } catch {
+      console.log("Collection doesn't exist, creating new one...");
+      // If collection doesn't exist, create a new one
+      vectorStore = await Chroma.fromDocuments([], embeddings, {
+        collectionName: "youtube-transcripts",
+        url: process.env.CHROMA_URL || "http://localhost:8000",
+      });
+    }
   }
   return vectorStore;
 }
@@ -52,7 +62,11 @@ export async function addDocumentsToVectorStore(
     },
   }));
 
+  console.log(`Adding ${documentsWithMetadata.length} documents to vector store for user ${userId}`);
+  console.log("Sample metadata:", documentsWithMetadata[0]?.metadata);
+
   await store.addDocuments(documentsWithMetadata);
+  console.log("Successfully added documents to vector store");
 }
 
 export async function searchSimilarDocuments(
@@ -62,12 +76,22 @@ export async function searchSimilarDocuments(
 ): Promise<Document[]> {
   const store = await getVectorStore();
 
-  // Search with user filter
-  const results = await store.similaritySearch(query, k, {
-    userId,
-  });
+  console.log(`Searching for query: "${query}" for user: ${userId}`);
 
-  return results;
+  // Search without filter first, then filter by userId
+  const results = await store.similaritySearch(query, k * 2); // Get more results to filter
+
+  console.log(`Found ${results.length} total results before filtering`);
+
+  // Filter results by userId
+  const filteredResults = results.filter((doc) => 
+    doc.metadata?.userId === userId
+  ).slice(0, k); // Take only the requested number
+
+  console.log(`Found ${filteredResults.length} results after filtering for user ${userId}`);
+  console.log("Sample filtered result metadata:", filteredResults[0]?.metadata);
+
+  return filteredResults;
 }
 
 export async function processTranscriptForRAG(
