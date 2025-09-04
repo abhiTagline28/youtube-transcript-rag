@@ -1,5 +1,5 @@
 // Debug script to test vector store functionality
-// Run with: node debug-vector-store.js
+// Run with: npx ts-node debug-vector-store.ts
 
 import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
@@ -7,6 +7,14 @@ import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 async function debugVectorStore() {
   try {
     console.log("🔍 Starting vector store debug...");
+    
+    // Check if environment variables are set
+    if (!process.env.GOOGLE_API_KEY) {
+      console.error("❌ GOOGLE_API_KEY environment variable is not set");
+      return;
+    }
+    
+    console.log("✅ Environment variables loaded");
 
     // Initialize embeddings
     const embeddings = new GoogleGenerativeAIEmbeddings({
@@ -37,7 +45,7 @@ async function debugVectorStore() {
     console.log("🔍 Testing search functionality...");
     const results = await store.similaritySearch("test query", 5);
     console.log(`Found ${results.length} results`);
-
+    
     if (results.length > 0) {
       console.log("Sample result metadata:", results[0].metadata);
     }

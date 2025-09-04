@@ -1,5 +1,5 @@
 // Debug script to test vector store functionality
-// Run with: node debug-vector-store.js
+// Run with: node debug-vector-store.mjs
 
 import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
