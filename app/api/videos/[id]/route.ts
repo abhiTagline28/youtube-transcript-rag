@@ -6,7 +6,7 @@ import { getTokenFromCookies, verifyToken } from "@/lib/auth";
 // GET - Fetch a specific video with transcript
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication
@@ -32,7 +32,8 @@ export async function GET(
       );
     }
 
-    const videoId = params.id;
+    const resolvedParams = await params;
+    const videoId = resolvedParams.id;
 
     if (!videoId) {
       return new Response(

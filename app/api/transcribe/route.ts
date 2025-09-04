@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import Video from "@/models/Video";
 import { NextRequest } from "next/server";
 import { getTokenFromCookies, verifyToken } from "@/lib/auth";
+import { processTranscriptForRAG } from "@/lib/vectorStore";
 
 // This will handle the POST request from your frontend
 export async function POST(request: NextRequest) {
@@ -103,6 +104,15 @@ export async function POST(request: NextRequest) {
     });
 
     await video.save();
+
+    // Process transcript for RAG (vector embeddings)
+    try {
+      await processTranscriptForRAG(fullText, videoId, videoTitle, payload.userId);
+      console.log("Successfully processed transcript for RAG.");
+    } catch (ragError) {
+      console.error("Error processing transcript for RAG:", ragError);
+      // Don't fail the entire request if RAG processing fails
+    }
 
     console.log("Successfully transcribed and stored in database.");
     return new Response(JSON.stringify({ 

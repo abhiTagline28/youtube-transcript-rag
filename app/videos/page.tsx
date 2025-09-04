@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import ChatInterface from "@/components/ChatInterface";
 import Link from "next/link";
+import Image from "next/image";
 
 interface Video {
   _id: string;
@@ -32,6 +34,13 @@ export default function VideosPage() {
     isOpen: false,
     video: null,
     isLoading: false,
+  });
+  const [chatModal, setChatModal] = useState<{
+    isOpen: boolean;
+    video: Video | null;
+  }>({
+    isOpen: false,
+    video: null,
   });
 
   useEffect(() => {
@@ -162,6 +171,20 @@ export default function VideosPage() {
       isOpen: false,
       video: null,
       isLoading: false,
+    });
+  };
+
+  const handleChatClick = (video: Video) => {
+    setChatModal({
+      isOpen: true,
+      video,
+    });
+  };
+
+  const handleChatClose = () => {
+    setChatModal({
+      isOpen: false,
+      video: null,
     });
   };
 
@@ -349,10 +372,11 @@ export default function VideosPage() {
                       {/* Thumbnail */}
                       <div className="aspect-video bg-gray-200 relative">
                         {video.thumbnailUrl ? (
-                          <img
+                          <Image
                             src={video.thumbnailUrl}
                             alt={video.videoTitle}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
@@ -403,25 +427,46 @@ export default function VideosPage() {
                               Watch Video
                             </a>
                           </div>
-                          <button
-                            onClick={() => handleDeleteClick(video)}
-                            className="w-full bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition-colors text-sm flex items-center justify-center"
-                          >
-                            <svg
-                              className="w-4 h-4 mr-2"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleChatClick(video)}
+                              className="flex-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-sm flex items-center justify-center"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                            Delete Video
-                          </button>
+                              <svg
+                                className="w-4 h-4 mr-2"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                />
+                              </svg>
+                              Chat
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(video)}
+                              className="flex-1 bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition-colors text-sm flex items-center justify-center"
+                            >
+                              <svg
+                                className="w-4 h-4 mr-2"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -520,6 +565,19 @@ export default function VideosPage() {
             isLoading={deleteModal.isLoading}
             type="danger"
           />
+
+          {/* Chat Modal */}
+          {chatModal.isOpen && chatModal.video && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg max-w-4xl w-full h-[600px] overflow-hidden">
+                <ChatInterface
+                  videoId={chatModal.video.videoId}
+                  videoTitle={chatModal.video.videoTitle}
+                  onClose={handleChatClose}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
