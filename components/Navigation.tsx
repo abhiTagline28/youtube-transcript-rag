@@ -24,6 +24,24 @@ export default function Navigation() {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
+                <Link
+                  href="/"
+                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/upload"
+                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Upload
+                </Link>
+                <Link
+                  href="/videos"
+                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Videos
+                </Link>
                 <span className="text-gray-700">Welcome, {user.name}</span>
                 <button
                   onClick={handleLogout}

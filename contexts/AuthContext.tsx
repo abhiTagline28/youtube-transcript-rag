@@ -33,7 +33,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch("/api/auth/me");
+      const response = await fetch("/api/auth/me", {
+        credentials: "include", // Include cookies in the request
+      });
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
@@ -51,7 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include", // Include cookies in the request
+      });
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {

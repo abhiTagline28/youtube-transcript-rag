@@ -10,17 +10,11 @@ export function middleware(request: NextRequest) {
   // Protected routes that require authentication
   const protectedRoutes = ['/dashboard', '/profile'];
   
-  // API routes that require authentication
-  const protectedApiRoutes = ['/api/transcribe'];
-  
   // Check if the current path is a public route
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
   
   // Check if the current path is a protected route
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-  
-  // Check if the current path is a protected API route
-  const isProtectedApiRoute = protectedApiRoutes.some(route => pathname.startsWith(route));
   
   // Get token from cookies
   const token = getTokenFromCookies(request);
@@ -32,13 +26,7 @@ export function middleware(request: NextRequest) {
   }
   
   // Redirect unauthenticated users to login for protected routes
-  if (!isAuthenticated && (isProtectedRoute || isProtectedApiRoute)) {
-    if (isProtectedApiRoute) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
+  if (!isAuthenticated && isProtectedRoute) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
   
@@ -53,7 +41,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - api routes (handled by individual API routes)
      */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public/|api/).*)',
   ],
 };

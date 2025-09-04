@@ -1,62 +1,150 @@
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { Chroma } from "@langchain/community/vectorstores/chroma";
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { YoutubeLoader } from "@langchain/community/document_loaders/web/youtube";
+import connectDB from "@/lib/mongodb";
+import Video from "@/models/Video";
+import { NextRequest } from "next/server";
+import { getTokenFromCookies, verifyToken } from "@/lib/auth";
 
 // This will handle the POST request from your frontend
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const token = getTokenFromCookies(request);
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      return new Response(
+        JSON.stringify({ error: "Invalid token" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const { youtubeUrl } = await request.json();
 
     if (!youtubeUrl) {
-      return new Response(JSON.stringify({ error: "Please enter a YouTube URL." }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: "Please enter a YouTube URL." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
-    
+
+    // Extract video ID from URL
+    const videoId = extractVideoId(youtubeUrl);
+    if (!videoId) {
+      return new Response(
+        JSON.stringify({ error: "Invalid YouTube URL." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Connect to database
+    await connectDB();
+
+    // Check if video already exists for this user
+    const existingVideo = await Video.findOne({ 
+      userId: payload.userId, 
+      videoId: videoId 
+    });
+
+    if (existingVideo) {
+      return new Response(
+        JSON.stringify({ 
+          error: "This video has already been transcribed.",
+          transcript: existingVideo.transcript 
+        }),
+        {
+          status: 409,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // 1. Load video content using LangChain's YoutubeLoader
     const loader = YoutubeLoader.createFromUrl(youtubeUrl, {
       language: "en",
       addVideoInfo: true,
     });
-    
+
     const docs = await loader.load();
     const fullText = docs.map((doc) => doc.pageContent).join(" ");
-    
-    // 2. Chunk the document
-    const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 200,
-    });
-    const chunkedDocs = await splitter.splitDocuments(docs);
 
-    // 3. Store chunks in ChromaDB with Google Generative AI Embeddings
-    const embeddings = new GoogleGenerativeAIEmbeddings();
-    const vectorStore = await Chroma.fromDocuments(chunkedDocs, embeddings, {
-      collectionName: "youtube-transcripts",
-      url: "http://localhost:8000",
+    // Extract video metadata
+    const videoInfo = docs[0]?.metadata || {};
+    const videoTitle = videoInfo.title || "Unknown Title";
+    const thumbnailUrl = videoInfo.thumbnail_url;
+    const duration = videoInfo.length_seconds;
+
+    // 2. Save to database
+    const video = new Video({
+      userId: payload.userId,
+      videoId: videoId,
+      videoTitle: videoTitle,
+      videoUrl: youtubeUrl,
+      thumbnailUrl: thumbnailUrl,
+      duration: duration,
+      transcript: fullText,
     });
 
-    console.log("Successfully transcribed and stored in Chroma.");
-    return new Response(JSON.stringify({ transcript: fullText }), {
+    await video.save();
+
+    console.log("Successfully transcribed and stored in database.");
+    return new Response(JSON.stringify({ 
+      transcript: fullText,
+      videoId: videoId,
+      videoTitle: videoTitle 
+    }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
     console.error(err);
-    return new Response(JSON.stringify({ error: `Failed to process video: ${err instanceof Error ? err.message : String(err)}` }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        error: `Failed to process video: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }
 
+// Helper function to extract video ID from YouTube URL
+function extractVideoId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /youtube\.com\/v\/([^&\n?#]+)/,
+  ];
 
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) {
+      return match[1];
+    }
+  }
 
-
-
-
+  return null;
+}
 
 // import { YoutubeTranscript } from "youtube-transcript";
 // import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
@@ -96,7 +184,7 @@ export async function POST(request: Request) {
 //         language: "en",
 //         addVideoInfo: true,
 //       });
-      
+
 //       const docs1 = await loader.load();
 //       console.log("docs1 : ",docs1);
 
