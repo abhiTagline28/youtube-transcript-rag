@@ -1,26 +1,341 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* AI Theme Colors */
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --secondary: #06b6d4;
+  --accent: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  
+  /* Dark Theme */
+  --bg-primary: #0f0f23;
+  --bg-secondary: #1a1a2e;
+  --bg-tertiary: #16213e;
+  --bg-card: #1e1e3f;
+  --bg-hover: #2a2a4a;
+  
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+  --gradient-secondary: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+  --gradient-card: linear-gradient(145deg, #1e1e3f 0%, #2a2a4a 100%);
+  
+  /* Shadows */
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+/* AI Glow Effects */
+.ai-glow {
+  box-shadow: var(--shadow-glow);
+  transition: all 0.3s ease;
+}
+
+.ai-glow:hover {
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated Background */
+.animated-bg {
+  background: var(--gradient-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+  animation: float 6s ease-in-out infinite;
+  pointer-events: none; /* Ensure background doesn't block interactions */
+  z-index: 0; /* Keep background behind content */
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* Glass Morphism */
+.glass {
+  background: rgba(30, 30, 63, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  position: relative;
+  z-index: 10; /* Ensure glass elements are above other content */
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Slide In Animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.6s ease-out;
+}
+
+/* Button Styles */
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  z-index: 1; /* Ensure button is above background */
+  user-select: none; /* Prevent text selection on click */
+  -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-primary:active {
+  transform: translateY(0px);
+  transition: transform 0.1s ease;
+}
+
+.btn-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+  pointer-events: none; /* Ensure pseudo-element doesn't block clicks */
+  z-index: -1; /* Keep behind button content */
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+/* Card Styles */
+.card {
+  background: var(--gradient-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1; /* Ensure cards are above background */
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.card:active {
+  transform: translateY(-2px);
+  transition: transform 0.1s ease;
+}
+
+/* Input Styles */
+.input-field {
+  background: var(--bg-card);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  width: 100%;
+  position: relative;
+  z-index: 1; /* Ensure inputs are above background */
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: var(--bg-card);
+}
+
+.input-field:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+/* Loading Spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(99, 102, 241, 0.1);
+  border-left: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Interactive Elements Fixes */
+button, a, input, select, textarea {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure all clickable elements are properly interactive */
+[role="button"], 
+button, 
+a[href], 
+input[type="button"], 
+input[type="submit"], 
+input[type="reset"] {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fix for any potential pointer-events issues */
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure proper event handling */
+button:not(:disabled),
+a:not([aria-disabled="true"]),
+[role="button"]:not([aria-disabled="true"]) {
+  pointer-events: auto;
+}
+
+/* Disabled state handling */
+button:disabled,
+a[aria-disabled="true"],
+[role="button"][aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Fix for mobile touch events */
+@media (hover: none) and (pointer: coarse) {
+  .btn-primary:hover,
+  .card:hover {
+    transform: none;
+  }
+  
+  .btn-primary:active,
+  .card:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Ensure proper stacking context */
+.animated-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+  }
+  
+  .btn-primary {
+    padding: 10px 20px;
+  }
 }

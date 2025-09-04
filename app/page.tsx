@@ -56,42 +56,46 @@ export default function Home() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen animated-bg flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="spinner mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen animated-bg">
       <Navigation />
 
       {user ? (
         // Authenticated user content - Dashboard
-        <div className="flex flex-col items-center justify-center py-12 px-4">
-          <div className="w-full max-w-4xl bg-white rounded-lg shadow-xl p-8 space-y-8">
-            <div className="text-center">
-              <h1 className="text-3xl font-extrabold text-gray-900 mb-4">
-                YouTube RAG Dashboard
+        <div className="pt-20 pb-12 px-4">
+          <div className="max-w-7xl mx-auto">
+            {/* Hero Section */}
+            <div className="text-center mb-12 slide-in">
+              <h1 className="text-5xl md:text-6xl font-bold gradient-text mb-6">
+                AI-Powered Dashboard
               </h1>
-              <p className="text-gray-500 text-lg">
-                Welcome back, {user.name}! Choose an action to get started.
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                Welcome back,{" "}
+                <span className="text-white font-semibold">{user.name}</span>!
+                Transform your YouTube content with cutting-edge AI technology.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Upload & Transcribe Button */}
+            {/* Main Action Cards */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {/* Upload & Transcribe */}
               <Link
                 href="/upload"
-                className="group bg-gradient-to-br from-blue-500 to-blue-600 text-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                className="card ai-glow group hover:scale-105 transition-all duration-300"
               >
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                     <svg
-                      className="w-8 h-8"
+                      className="w-8 h-8 text-white"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -104,25 +108,24 @@ export default function Home() {
                       />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold mb-2">
+                  <h3 className="text-xl font-bold text-white mb-2">
                     Upload & Transcribe
-                  </h2>
-                  <p className="text-blue-100">
-                    Upload a YouTube video link and get it transcribed with
-                    AI-powered transcription technology.
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    Transform YouTube videos into searchable transcripts with AI
                   </p>
                 </div>
               </Link>
 
-              {/* Video List Button */}
+              {/* Video Library */}
               <Link
                 href="/videos"
-                className="group bg-gradient-to-br from-green-500 to-green-600 text-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                className="card ai-glow group hover:scale-105 transition-all duration-300"
               >
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                     <svg
-                      className="w-8 h-8"
+                      className="w-8 h-8 text-white"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -131,90 +134,240 @@ export default function Home() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
                       />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold mb-2">Video Library</h2>
-                  <p className="text-green-100">
-                    View all your transcribed videos and their transcripts in
-                    one organized place.
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Video Library
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    Browse and manage your transcribed video collection
                   </p>
                 </div>
               </Link>
+
+              {/* AI Chat */}
+              <Link
+                href="/chat"
+                className="card ai-glow group hover:scale-105 transition-all duration-300"
+              >
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">AI Chat</h3>
+                  <p className="text-gray-400 text-sm">
+                    Ask questions about your videos with intelligent AI
+                  </p>
+                </div>
+              </Link>
+
+              {/* Analytics */}
+              <div className="card ai-glow group hover:scale-105 transition-all duration-300">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Analytics
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    Insights and statistics about your content
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-                Quick Overview
+            {/* Stats Section */}
+            <div className="card ai-glow">
+              <h3 className="text-2xl font-bold text-white mb-8 text-center">
+                Your Content Overview
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div className="p-4 bg-white rounded-lg shadow">
-                  <div className="text-2xl font-bold text-blue-600">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center p-6 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl border border-indigo-500/30">
+                  <div className="text-4xl font-bold gradient-text mb-2">
                     {statsLoading ? (
-                      <div className="animate-pulse bg-gray-300 h-8 w-12 mx-auto rounded"></div>
+                      <div className="spinner mx-auto"></div>
                     ) : (
                       stats.totalVideos
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-gray-300 font-medium">
                     Videos Transcribed
                   </div>
                 </div>
-                <div className="p-4 bg-white rounded-lg shadow">
-                  <div className="text-2xl font-bold text-green-600">
+                <div className="text-center p-6 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl border border-emerald-500/30">
+                  <div className="text-4xl font-bold gradient-text mb-2">
                     {statsLoading ? (
-                      <div className="animate-pulse bg-gray-300 h-8 w-16 mx-auto rounded"></div>
+                      <div className="spinner mx-auto"></div>
                     ) : (
                       formatDuration(stats.totalDuration)
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">Total Duration</div>
+                  <div className="text-gray-300 font-medium">
+                    Total Duration
+                  </div>
                 </div>
-                <div className="p-4 bg-white rounded-lg shadow">
-                  <div className="text-2xl font-bold text-purple-600">
+                <div className="text-center p-6 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl border border-cyan-500/30">
+                  <div className="text-4xl font-bold gradient-text mb-2">
                     {statsLoading ? (
-                      <div className="animate-pulse bg-gray-300 h-8 w-16 mx-auto rounded"></div>
+                      <div className="spinner mx-auto"></div>
                     ) : (
                       stats.totalWords.toLocaleString()
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">Words Transcribed</div>
+                  <div className="text-gray-300 font-medium">
+                    Words Transcribed
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       ) : (
-        // Non-authenticated user content
-        <div className="flex flex-col items-center justify-center py-12 px-4">
-          <div className="w-full max-w-2xl bg-white rounded-lg shadow-xl p-8 space-y-6 text-center">
-            <h1 className="text-3xl font-extrabold text-gray-900">
-              Welcome to YouTube RAG Transcriber
-            </h1>
-            <p className="text-gray-500 text-lg">
-              Transcribe YouTube videos and store them in a vector database for
-              AI-powered search and analysis.
-            </p>
-
-            <div className="space-y-4">
-              <p className="text-gray-600">
-                Please sign in or create an account to get started.
+        // Non-authenticated user content - Landing Page
+        <div className="pt-20 pb-12 px-4">
+          <div className="max-w-6xl mx-auto">
+            {/* Hero Section */}
+            <div className="text-center mb-16 slide-in">
+              <h1 className="text-6xl md:text-7xl font-bold gradient-text mb-6">
+                AI-Powered Video Intelligence
+              </h1>
+              <p className="text-xl text-gray-300 max-w-4xl mx-auto mb-8">
+                Transform YouTube videos into searchable, intelligent content
+                with cutting-edge AI technology. Transcribe, analyze, and chat
+                with your videos like never before.
               </p>
-
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
+                  href="/signup"
+                  className="btn-primary text-lg px-8 py-4 ai-glow"
+                >
+                  Get Started Free
+                </Link>
+                <Link
                   href="/login"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium"
+                  className="px-8 py-4 border-2 border-white/20 text-white rounded-xl hover:bg-white/10 transition-all duration-200 text-lg font-medium"
                 >
                   Sign In
                 </Link>
+              </div>
+            </div>
+
+            {/* Features Grid */}
+            <div className="grid md:grid-cols-3 gap-8 mb-16">
+              <div className="card ai-glow text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">
+                  Lightning Fast
+                </h3>
+                <p className="text-gray-400">
+                  AI-powered transcription that works in seconds, not minutes
+                </p>
+              </div>
+
+              <div className="card ai-glow text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">
+                  Smart Search
+                </h3>
+                <p className="text-gray-400">
+                  Find any moment in your videos with intelligent semantic
+                  search
+                </p>
+              </div>
+
+              <div className="card ai-glow text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">AI Chat</h3>
+                <p className="text-gray-400">
+                  Ask questions and get intelligent answers about your content
+                </p>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="text-center">
+              <div className="card ai-glow max-w-4xl mx-auto">
+                <h2 className="text-3xl font-bold gradient-text mb-4">
+                  Ready to Transform Your Content?
+                </h2>
+                <p className="text-gray-300 text-lg mb-8">
+                  Join thousands of creators who are already using AI to unlock
+                  the power of their video content.
+                </p>
                 <Link
                   href="/signup"
-                  className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors font-medium"
+                  className="btn-primary text-lg px-8 py-4 ai-glow"
                 >
-                  Create Account
+                  Start Your AI Journey
                 </Link>
               </div>
             </div>
