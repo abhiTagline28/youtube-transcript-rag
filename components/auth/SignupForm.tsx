@@ -279,7 +279,7 @@ export default function SignupForm() {
               >
                 {loading ? (
                   <>
-                    <div className="spinner w-5 h-5 mr-3"></div>
+                    <div className="spinner w-5 h-5 mr-3 loading-enhanced"></div>
                     Creating account...
                   </>
                 ) : (

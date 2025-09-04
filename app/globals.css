@@ -260,15 +260,45 @@ body {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(99, 102, 241, 0.1);
-  border-left: 4px solid var(--primary);
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-left: 3px solid #ffffff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+/* Smaller spinner for buttons */
+.spinner.w-6 {
+  width: 24px;
+  height: 24px;
+  border-width: 2px;
+}
+
+.spinner.w-5 {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Enhanced loading animation */
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    opacity: 1;
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    opacity: 0.8;
+  }
+}
+
+.spinner.loading-enhanced {
+  animation: spin 1s linear infinite, pulse-glow 2s ease-in-out infinite;
 }
 
 /* Interactive Elements Fixes */

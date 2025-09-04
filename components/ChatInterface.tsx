@@ -257,7 +257,7 @@ export default function ChatInterface({
             <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl px-6 py-4 border border-white/10 backdrop-blur-sm">
               <div className="flex items-center space-x-3">
                 <div className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
-                  <div className="spinner w-4 h-4"></div>
+                  <div className="spinner w-4 h-4 loading-enhanced"></div>
                 </div>
                 <span className="text-white text-sm">AI is thinking...</span>
               </div>
@@ -334,7 +334,7 @@ export default function ChatInterface({
             className="btn-primary ai-glow px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isLoading ? (
-              <div className="spinner w-5 h-5"></div>
+              <div className="spinner w-5 h-5 loading-enhanced"></div>
             ) : (
               <svg
                 className="w-5 h-5"
