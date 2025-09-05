@@ -50,7 +50,7 @@ html {
 }
 
 body {
-  background: var(--bg-primary);
+  background: transparent; /* Let AnimatedBackground handle the background */
   color: var(--text-primary);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.6;
@@ -94,26 +94,14 @@ body {
   background-clip: text;
 }
 
-/* Animated Background */
+/* Animated Background - Override any existing background */
 .animated-bg {
-  background: var(--gradient-secondary);
   position: relative;
   overflow: hidden;
+  background: transparent !important; /* Override any existing background */
 }
 
-.animated-bg::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
-  animation: float 6s ease-in-out infinite;
-  pointer-events: none; /* Ensure background doesn't block interactions */
-  z-index: 0; /* Keep background behind content */
-}
+/* Remove the old static background since we're using the AnimatedBackground component */
 
 @keyframes float {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -359,6 +347,522 @@ a[aria-disabled="true"],
   z-index: 1;
 }
 
+/* ===========================================
+   ANIMATED BACKGROUNDS - 5 AI THEMES
+   =========================================== */
+
+/* Animation 1: Neural Network */
+.neural-network-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+              linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  z-index: -1;
+}
+
+.neural-node {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #6366f1 0%, #8b5cf6 100%);
+  border-radius: 50%;
+  animation: neural-pulse 3s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+}
+
+.neural-connection {
+  position: absolute;
+  height: 2px;
+  width: 100px;
+  background: linear-gradient(90deg, transparent, #6366f1, transparent);
+  animation: neural-flow 4s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes neural-pulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
+@keyframes neural-flow {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: scaleX(0.5);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scaleX(1.2);
+  }
+}
+
+/* Animation 2: Data Streams */
+.data-streams-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  z-index: -1;
+}
+
+.data-stream {
+  position: absolute;
+  top: -100px;
+  width: 2px;
+  height: 100vh;
+  animation: data-flow 6s linear infinite;
+}
+
+.data-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #06b6d4;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #06b6d4;
+  animation: particle-move 2s linear infinite;
+}
+
+@keyframes data-flow {
+  0% { transform: translateY(-100vh); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes particle-move {
+  0% { 
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { 
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+/* Animation 3: Matrix Rain */
+.matrix-rain-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+  z-index: -1;
+}
+
+.matrix-column {
+  position: absolute;
+  top: -100vh;
+  width: 20px;
+  height: 200vh;
+  animation: matrix-fall 8s linear infinite;
+}
+
+.matrix-char {
+  position: absolute;
+  color: #10b981;
+  font-size: 14px;
+  line-height: 1.2;
+  text-shadow: 0 0 5px #10b981;
+  animation: matrix-fade 2s linear infinite;
+}
+
+@keyframes matrix-fall {
+  0% { transform: translateY(-100vh); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes matrix-fade {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Animation 4: Quantum Particles */
+.quantum-particles-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 70% 30%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+              linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  z-index: -1;
+}
+
+.quantum-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #8b5cf6 0%, #06b6d4 100%);
+  border-radius: 50%;
+  animation: quantum-float 5s ease-in-out infinite;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+}
+
+.quantum-wave {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 50%;
+  animation: quantum-expand 4s ease-out infinite;
+}
+
+@keyframes quantum-float {
+  0%, 100% { 
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+  25% { 
+    transform: translate(20px, -30px) scale(1.2);
+    opacity: 1;
+  }
+  50% { 
+    transform: translate(-15px, -60px) scale(0.8);
+    opacity: 0.6;
+  }
+  75% { 
+    transform: translate(30px, -40px) scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+@keyframes quantum-expand {
+  0% { 
+    transform: scale(0.1);
+    opacity: 1;
+  }
+  100% { 
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Animation 5: Holographic Grid */
+.holographic-grid-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  z-index: -1;
+}
+
+.grid-lines {
+  position: absolute;
+  inset: 0;
+}
+
+.grid-line {
+  position: absolute;
+  background: linear-gradient(90deg, transparent, #6366f1, transparent);
+  animation: grid-pulse 3s ease-in-out infinite;
+}
+
+.grid-line.horizontal {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #6366f1, transparent);
+}
+
+.grid-line.vertical {
+  height: 100%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, #6366f1, transparent);
+}
+
+.grid-node {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #6366f1;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #6366f1;
+  animation: grid-glow 2s ease-in-out infinite;
+}
+
+@keyframes grid-pulse {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: scaleX(1);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scaleX(1.1);
+  }
+}
+
+@keyframes grid-glow {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% { 
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
+/* Smooth transitions between animations */
+.animated-bg {
+  transition: opacity 2s ease-in-out;
+}
+
+/* Animation 6: Circuit Board */
+.circuit-board-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  z-index: -1;
+}
+
+.circuit-path {
+  position: absolute;
+  height: 2px;
+  width: 80px;
+  background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+  animation: circuit-pulse 3s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+.circuit-node {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #f59e0b;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #f59e0b;
+  animation: circuit-glow 2s ease-in-out infinite;
+}
+
+@keyframes circuit-pulse {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: scaleX(0.8);
+  }
+  50% { 
+    opacity: 0.9;
+    transform: scaleX(1.2);
+  }
+}
+
+@keyframes circuit-glow {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% { 
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
+/* Animation 7: Digital Waves */
+.digital-waves-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  z-index: -1;
+}
+
+.digital-wave {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  animation: wave-flow 4s linear infinite;
+}
+
+.wave-segment {
+  position: absolute;
+  width: 2px;
+  height: 100%;
+  background: #06b6d4;
+  box-shadow: 0 0 5px #06b6d4;
+  animation: wave-pulse 1s ease-in-out infinite;
+}
+
+@keyframes wave-flow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes wave-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Animation 8: Cyber City */
+.cyber-city-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  z-index: -1;
+}
+
+.building {
+  position: absolute;
+  bottom: 0;
+  width: 20px;
+  background: linear-gradient(180deg, #374151 0%, #1f2937 100%);
+  animation: building-glow 4s ease-in-out infinite;
+  border-left: 1px solid #4b5563;
+  border-right: 1px solid #4b5563;
+}
+
+.city-light {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+  animation: city-twinkle 2s ease-in-out infinite;
+}
+
+@keyframes building-glow {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(75, 85, 99, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 15px rgba(75, 85, 99, 0.6);
+  }
+}
+
+@keyframes city-twinkle {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Animation 9: Data Matrix */
+.data-matrix-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  z-index: -1;
+  font-family: 'Courier New', monospace;
+}
+
+.matrix-column {
+  position: absolute;
+  top: -100vh;
+  width: 20px;
+  height: 200vh;
+  animation: matrix-fall 6s linear infinite;
+}
+
+.matrix-symbol {
+  position: absolute;
+  color: #10b981;
+  font-size: 12px;
+  line-height: 1.2;
+  text-shadow: 0 0 3px #10b981;
+  animation: matrix-fade 1.5s linear infinite;
+}
+
+/* Animation 10: AI Orbit */
+.ai-orbit-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 70%),
+              linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
+  z-index: -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbit-center {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  animation: orbit-rotate 8s linear infinite;
+}
+
+.core-particle {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, #8b5cf6 0%, #06b6d4 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 20px #8b5cf6;
+  animation: core-pulse 2s ease-in-out infinite;
+}
+
+.orbit-ring {
+  position: absolute;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 50%;
+  animation: orbit-rotate 6s linear infinite;
+}
+
+.orbit-ring:nth-child(2) {
+  width: 100px;
+  height: 100px;
+  animation-duration: 4s;
+}
+
+.orbit-ring:nth-child(3) {
+  width: 150px;
+  height: 150px;
+  animation-duration: 6s;
+}
+
+.orbit-ring:nth-child(4) {
+  width: 200px;
+  height: 200px;
+  animation-duration: 8s;
+}
+
+.orbit-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #06b6d4;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #06b6d4;
+  top: -2px;
+  left: 50%;
+  transform-origin: 0 50px;
+  animation: particle-orbit 3s linear infinite;
+}
+
+@keyframes orbit-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes core-pulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes particle-orbit {
+  0% { transform: rotate(0deg) translateX(0); }
+  100% { transform: rotate(360deg) translateX(0); }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .card {
@@ -367,5 +871,20 @@ a[aria-disabled="true"],
   
   .btn-primary {
     padding: 10px 20px;
+  }
+  
+  /* Reduce animation intensity on mobile */
+  .neural-node,
+  .quantum-particle,
+  .grid-node,
+  .circuit-node,
+  .city-light,
+  .orbit-particle {
+    transform: scale(0.8);
+  }
+  
+  .matrix-char,
+  .matrix-symbol {
+    font-size: 10px;
   }
 }
