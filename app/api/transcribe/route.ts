@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 import { getTokenFromCookies, verifyToken } from "@/lib/auth";
 import { processTranscriptForRAG } from "@/lib/vectorStore";
 import { analyzeVideo } from "@/lib/videoAnalysisService";
+import { analyzeComments } from "@/lib/youtubeCommentsService";
 
 // This will handle the POST request from your frontend
 export async function POST(request: NextRequest) {
@@ -86,6 +87,11 @@ export async function POST(request: NextRequest) {
     const videoTitle = videoInfo.title || "Unknown Title";
     const thumbnailUrl = videoInfo.thumbnail_url;
     const duration = videoInfo.length_seconds;
+    const authorName = videoInfo.author || "Unknown Author";
+    const authorUrl = videoInfo.author_url;
+    const viewCount = videoInfo.view_count;
+    const likeCount = videoInfo.like_count;
+    const commentCount = videoInfo.comment_count;
 
     // 2. Generate video analysis (description and Q&A pairs)
     let videoAnalysis;
@@ -99,7 +105,24 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // 3. Save to database
+    // 3. Analyze comments (optional, can be done in background)
+    let analyzedComments = [];
+    try {
+      console.log(`Starting comment analysis for video: ${videoId}`);
+      analyzedComments = await analyzeComments(videoId);
+      console.log(
+        `Successfully analyzed ${analyzedComments.length} comments:`,
+        analyzedComments
+      );
+    } catch (commentError) {
+      console.error("Error analyzing comments:", commentError);
+      // Continue without comments if it fails
+    }
+
+    // 4. Save to database
+    console.log(
+      `Saving video with ${analyzedComments.length} comments to database`
+    );
     const video = new Video({
       userId: payload.userId,
       videoId: videoId,
@@ -107,12 +130,22 @@ export async function POST(request: NextRequest) {
       videoUrl: youtubeUrl,
       thumbnailUrl: thumbnailUrl,
       duration: duration,
+      authorName: authorName,
+      authorUrl: authorUrl,
+      viewCount: viewCount,
+      likeCount: likeCount,
+      commentCount: commentCount,
       transcript: fullText,
       description: videoAnalysis.description,
       qaPairs: videoAnalysis.qaPairs,
+      comments: analyzedComments,
     });
 
     await video.save();
+    console.log(
+      `Video saved successfully with comments:`,
+      video.comments?.length || 0
+    );
 
     // Process transcript for RAG (vector embeddings)
     try {

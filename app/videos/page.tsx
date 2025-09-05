@@ -6,6 +6,7 @@ import Navigation from "@/components/Navigation";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import ChatInterface from "@/components/ChatInterface";
 import VideoAnalysis from "@/components/VideoAnalysis";
+import CommentsAnalysis from "@/components/CommentsAnalysis";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -16,11 +17,23 @@ interface Video {
   videoUrl: string;
   thumbnailUrl?: string;
   duration?: number;
+  authorName?: string;
+  authorUrl?: string;
+  viewCount?: number;
+  likeCount?: number;
+  commentCount?: number;
   transcript: string;
   description?: string;
   qaPairs?: Array<{
     question: string;
     answer: string;
+  }>;
+  comments?: Array<{
+    text: string;
+    sentiment: "positive" | "negative" | "neutral";
+    author: string;
+    likeCount: number;
+    publishedAt: string;
   }>;
   createdAt: string;
 }
@@ -49,6 +62,13 @@ export default function VideosPage() {
     video: null,
   });
   const [analysisModal, setAnalysisModal] = useState<{
+    isOpen: boolean;
+    video: Video | null;
+  }>({
+    isOpen: false,
+    video: null,
+  });
+  const [commentsModal, setCommentsModal] = useState<{
     isOpen: boolean;
     video: Video | null;
   }>({
@@ -210,6 +230,20 @@ export default function VideosPage() {
 
   const handleAnalysisClose = () => {
     setAnalysisModal({
+      isOpen: false,
+      video: null,
+    });
+  };
+
+  const handleCommentsClick = (video: Video) => {
+    setCommentsModal({
+      isOpen: true,
+      video,
+    });
+  };
+
+  const handleCommentsClose = () => {
+    setCommentsModal({
       isOpen: false,
       video: null,
     });
@@ -444,9 +478,50 @@ export default function VideosPage() {
 
                       {/* Content */}
                       <div>
-                        <h3 className="font-bold text-white mb-3 line-clamp-2 text-lg">
+                        <h3 className="font-bold text-white mb-2 line-clamp-2 text-lg">
                           {video.videoTitle}
                         </h3>
+
+                        {/* Author and Stats */}
+                        <div className="mb-3">
+                          {video.authorName && (
+                            <p className="text-cyan-400 text-sm font-medium mb-1">
+                              by {video.authorName}
+                            </p>
+                          )}
+                          <div className="flex items-center space-x-4 text-xs text-gray-400">
+                            {video.viewCount && (
+                              <span className="flex items-center">
+                                <svg
+                                  className="w-3 h-3 mr-1"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                {video.viewCount.toLocaleString()} views
+                              </span>
+                            )}
+                            {video.likeCount && (
+                              <span className="flex items-center">
+                                <svg
+                                  className="w-3 h-3 mr-1"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.834a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                                </svg>
+                                {video.likeCount.toLocaleString()} likes
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
                         <p className="text-gray-400 text-sm mb-4">
                           Transcribed on {formatDate(video.createdAt)}
                         </p>
@@ -511,6 +586,27 @@ export default function VideosPage() {
                                 </svg>
                               </div>
                               Analysis
+                            </button>
+                            <button
+                              onClick={() => handleCommentsClick(video)}
+                              className="px-3 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 text-sm font-medium flex items-center justify-center ai-glow shadow-md hover:shadow-cyan-500/25 border border-cyan-400/20"
+                            >
+                              <div className="w-4 h-4 mr-1 bg-white/20 rounded flex items-center justify-center">
+                                <svg
+                                  className="w-2.5 h-2.5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                  />
+                                </svg>
+                              </div>
+                              Comments
                             </button>
                             <button
                               onClick={() => handleDeleteClick(video)}
@@ -680,6 +776,18 @@ export default function VideosPage() {
                   videoId={analysisModal.video.videoId}
                   videoTitle={analysisModal.video.videoTitle}
                   onClose={handleAnalysisClose}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Comments Modal */}
+          {commentsModal.isOpen && commentsModal.video && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="card ai-glow max-w-5xl w-full h-[700px] overflow-hidden">
+                <CommentsAnalysis
+                  comments={commentsModal.video.comments || []}
+                  onClose={handleCommentsClose}
                 />
               </div>
             </div>

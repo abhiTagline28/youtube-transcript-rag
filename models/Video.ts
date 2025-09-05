@@ -7,11 +7,23 @@ export interface IVideo extends Document {
   videoUrl: string;
   thumbnailUrl?: string;
   duration?: number;
+  authorName?: string;
+  authorUrl?: string;
+  viewCount?: number;
+  likeCount?: number;
+  commentCount?: number;
   transcript: string;
   description?: string;
   qaPairs?: Array<{
     question: string;
     answer: string;
+  }>;
+  comments?: Array<{
+    text: string;
+    sentiment: 'positive' | 'negative' | 'neutral';
+    author: string;
+    likeCount: number;
+    publishedAt: Date;
   }>;
   createdAt: Date;
   updatedAt: Date;
@@ -45,6 +57,23 @@ const VideoSchema: Schema = new Schema({
   duration: {
     type: Number,
   },
+  authorName: {
+    type: String,
+    trim: true,
+  },
+  authorUrl: {
+    type: String,
+    trim: true,
+  },
+  viewCount: {
+    type: Number,
+  },
+  likeCount: {
+    type: Number,
+  },
+  commentCount: {
+    type: Number,
+  },
   transcript: {
     type: String,
     required: [true, 'Transcript is required'],
@@ -63,6 +92,31 @@ const VideoSchema: Schema = new Schema({
       type: String,
       required: true,
       trim: true,
+    },
+  }],
+  comments: [{
+    text: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    sentiment: {
+      type: String,
+      enum: ['positive', 'negative', 'neutral'],
+      required: true,
+    },
+    author: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    likeCount: {
+      type: Number,
+      default: 0,
+    },
+    publishedAt: {
+      type: Date,
+      required: true,
     },
   }],
 }, {
