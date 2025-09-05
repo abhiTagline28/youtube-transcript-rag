@@ -8,6 +8,11 @@ export interface IVideo extends Document {
   thumbnailUrl?: string;
   duration?: number;
   transcript: string;
+  description?: string;
+  qaPairs?: Array<{
+    question: string;
+    answer: string;
+  }>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,6 +49,22 @@ const VideoSchema: Schema = new Schema({
     type: String,
     required: [true, 'Transcript is required'],
   },
+  description: {
+    type: String,
+    trim: true,
+  },
+  qaPairs: [{
+    question: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    answer: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  }],
 }, {
   timestamps: true,
 });
@@ -52,3 +73,4 @@ const VideoSchema: Schema = new Schema({
 VideoSchema.index({ userId: 1, videoId: 1 }, { unique: true });
 
 export default mongoose.models.Video || mongoose.model<IVideo>('Video', VideoSchema);
+

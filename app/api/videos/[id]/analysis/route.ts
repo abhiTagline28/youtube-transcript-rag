@@ -1,19 +1,18 @@
-import connectDB from "@/lib/mongodb";
-import Video from "@/models/Video";
 import { NextRequest } from "next/server";
 import { getTokenFromCookies, verifyToken } from "@/lib/auth";
+import connectDB from "@/lib/mongodb";
+import Video from "@/models/Video";
 
-// GET - Fetch a specific video with transcript
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Check authentication
     const token = getTokenFromCookies(request);
     if (!token) {
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ error: "Authentication required" }),
         {
           status: 401,
           headers: { "Content-Type": "application/json" },
@@ -32,8 +31,7 @@ export async function GET(
       );
     }
 
-    const resolvedParams = await params;
-    const videoId = resolvedParams.id;
+    const videoId = params.id;
 
     if (!videoId) {
       return new Response(
@@ -48,15 +46,15 @@ export async function GET(
     // Connect to database
     await connectDB();
 
-    // Fetch the specific video (only if it belongs to the authenticated user)
+    // Find the video by videoId (YouTube video ID)
     const video = await Video.findOne({
-      _id: videoId,
-      userId: payload.userId
-    }).lean();
+      videoId: videoId,
+      userId: payload.userId,
+    });
 
     if (!video) {
       return new Response(
-        JSON.stringify({ error: "Video not found or access denied" }),
+        JSON.stringify({ error: "Video not found" }),
         {
           status: 404,
           headers: { "Content-Type": "application/json" },
@@ -64,15 +62,23 @@ export async function GET(
       );
     }
 
-    return new Response(JSON.stringify({ video }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (err) {
-    console.error(err);
     return new Response(
       JSON.stringify({
-        error: `Failed to fetch video: ${
+        videoId: video.videoId,
+        videoTitle: video.videoTitle,
+        description: video.description || "",
+        qaPairs: video.qaPairs || [],
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (err) {
+    console.error("Error fetching video analysis:", err);
+    return new Response(
+      JSON.stringify({
+        error: `Failed to fetch video analysis: ${
           err instanceof Error ? err.message : String(err)
         }`,
       }),
