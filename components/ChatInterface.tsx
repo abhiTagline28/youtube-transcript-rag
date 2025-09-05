@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import VideoAnalysis from "./VideoAnalysis";
 
 interface Message {
   id: string;
@@ -29,6 +30,7 @@ export default function ChatInterface({
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showAnalysis, setShowAnalysis] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages are added
@@ -115,6 +117,16 @@ export default function ChatInterface({
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
+  if (showAnalysis && videoId) {
+    return (
+      <VideoAnalysis
+        videoId={videoId}
+        videoTitle={videoTitle || "Unknown Video"}
+        onClose={() => setShowAnalysis(false)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-gray-900 to-gray-800">
       {/* Header */}
@@ -146,26 +158,58 @@ export default function ChatInterface({
             </p>
           </div>
         </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-all duration-200"
-          >
-            <svg
-              className="w-6 h-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <div className="flex items-center space-x-2">
+          {videoId && (
+            <button
+              onClick={() => setShowAnalysis(true)}
+              className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 transition-all duration-300 text-sm font-semibold flex items-center shadow-lg hover:shadow-purple-500/25 border border-purple-400/20 hover:scale-105 transform relative overflow-hidden group whitespace-nowrap"
+              style={{
+                boxShadow:
+                  "0 4px 15px rgba(147, 51, 234, 0.3), 0 0 0 1px rgba(147, 51, 234, 0.1)",
+                background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+              }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        )}
+              <div className="w-4 h-4 mr-2 bg-white/20 rounded flex items-center justify-center group-hover:bg-white/30 transition-colors duration-200 flex-shrink-0">
+                <svg
+                  className="w-2.5 h-2.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <span className="font-bold group-hover:text-white/90 transition-colors duration-200">
+                Video Analysis
+              </span>
+            </button>
+          )}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-all duration-200"
+            >
+              <svg
+                className="w-6 h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}

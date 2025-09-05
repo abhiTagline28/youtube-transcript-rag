@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import ChatInterface from "@/components/ChatInterface";
+import VideoAnalysis from "@/components/VideoAnalysis";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -16,6 +17,11 @@ interface Video {
   thumbnailUrl?: string;
   duration?: number;
   transcript: string;
+  description?: string;
+  qaPairs?: Array<{
+    question: string;
+    answer: string;
+  }>;
   createdAt: string;
 }
 
@@ -36,6 +42,13 @@ export default function VideosPage() {
     isLoading: false,
   });
   const [chatModal, setChatModal] = useState<{
+    isOpen: boolean;
+    video: Video | null;
+  }>({
+    isOpen: false,
+    video: null,
+  });
+  const [analysisModal, setAnalysisModal] = useState<{
     isOpen: boolean;
     video: Video | null;
   }>({
@@ -183,6 +196,20 @@ export default function VideosPage() {
 
   const handleChatClose = () => {
     setChatModal({
+      isOpen: false,
+      video: null,
+    });
+  };
+
+  const handleAnalysisClick = (video: Video) => {
+    setAnalysisModal({
+      isOpen: true,
+      video,
+    });
+  };
+
+  const handleAnalysisClose = () => {
+    setAnalysisModal({
       isOpen: false,
       video: null,
     });
@@ -444,13 +471,13 @@ export default function VideosPage() {
                               Watch Video
                             </a>
                           </div>
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-3 gap-2">
                             <button
                               onClick={() => handleChatClick(video)}
-                              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all duration-200 text-sm font-medium flex items-center justify-center ai-glow"
+                              className="px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all duration-200 text-sm font-medium flex items-center justify-center ai-glow"
                             >
                               <svg
-                                className="w-4 h-4 mr-2"
+                                className="w-4 h-4 mr-1"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -462,14 +489,35 @@ export default function VideosPage() {
                                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                                 />
                               </svg>
-                              AI Chat
+                              Chat
+                            </button>
+                            <button
+                              onClick={() => handleAnalysisClick(video)}
+                              className="px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 transition-all duration-200 text-sm font-medium flex items-center justify-center ai-glow shadow-md hover:shadow-purple-500/25 border border-purple-400/20"
+                            >
+                              <div className="w-4 h-4 mr-1 bg-white/20 rounded flex items-center justify-center">
+                                <svg
+                                  className="w-2.5 h-2.5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  />
+                                </svg>
+                              </div>
+                              Analysis
                             </button>
                             <button
                               onClick={() => handleDeleteClick(video)}
-                              className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 text-sm font-medium flex items-center justify-center ai-glow"
+                              className="px-3 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 text-sm font-medium flex items-center justify-center ai-glow"
                             >
                               <svg
-                                className="w-4 h-4 mr-2"
+                                className="w-4 h-4 mr-1"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -619,6 +667,19 @@ export default function VideosPage() {
                   videoId={chatModal.video.videoId}
                   videoTitle={chatModal.video.videoTitle}
                   onClose={handleChatClose}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Analysis Modal */}
+          {analysisModal.isOpen && analysisModal.video && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="card ai-glow max-w-5xl w-full h-[700px] overflow-hidden">
+                <VideoAnalysis
+                  videoId={analysisModal.video.videoId}
+                  videoTitle={analysisModal.video.videoTitle}
+                  onClose={handleAnalysisClose}
                 />
               </div>
             </div>

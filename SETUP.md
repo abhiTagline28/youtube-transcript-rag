@@ -131,3 +131,4 @@ youtube-rag-app/
 5. Customize the UI as needed
 
 The authentication system is now fully integrated and ready to use!
+

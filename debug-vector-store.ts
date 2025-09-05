@@ -58,3 +58,4 @@ async function debugVectorStore() {
 
 // Run the debug function
 debugVectorStore();
+

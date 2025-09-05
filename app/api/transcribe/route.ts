@@ -4,6 +4,7 @@ import Video from "@/models/Video";
 import { NextRequest } from "next/server";
 import { getTokenFromCookies, verifyToken } from "@/lib/auth";
 import { processTranscriptForRAG } from "@/lib/vectorStore";
+import { analyzeVideo } from "@/lib/videoAnalysisService";
 
 // This will handle the POST request from your frontend
 export async function POST(request: NextRequest) {
@@ -22,13 +23,10 @@ export async function POST(request: NextRequest) {
 
     const payload = verifyToken(token);
     if (!payload) {
-      return new Response(
-        JSON.stringify({ error: "Invalid token" }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const { youtubeUrl } = await request.json();
@@ -46,29 +44,26 @@ export async function POST(request: NextRequest) {
     // Extract video ID from URL
     const videoId = extractVideoId(youtubeUrl);
     if (!videoId) {
-      return new Response(
-        JSON.stringify({ error: "Invalid YouTube URL." }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ error: "Invalid YouTube URL." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Connect to database
     await connectDB();
 
     // Check if video already exists for this user
-    const existingVideo = await Video.findOne({ 
-      userId: payload.userId, 
-      videoId: videoId 
+    const existingVideo = await Video.findOne({
+      userId: payload.userId,
+      videoId: videoId,
     });
 
     if (existingVideo) {
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "This video has already been transcribed.",
-          transcript: existingVideo.transcript 
+          transcript: existingVideo.transcript,
         }),
         {
           status: 409,
@@ -92,7 +87,19 @@ export async function POST(request: NextRequest) {
     const thumbnailUrl = videoInfo.thumbnail_url;
     const duration = videoInfo.length_seconds;
 
-    // 2. Save to database
+    // 2. Generate video analysis (description and Q&A pairs)
+    let videoAnalysis;
+    try {
+      videoAnalysis = await analyzeVideo(videoTitle, fullText, duration);
+    } catch (analysisError) {
+      // Continue without analysis if it fails
+      videoAnalysis = {
+        description: "",
+        qaPairs: [],
+      };
+    }
+
+    // 3. Save to database
     const video = new Video({
       userId: payload.userId,
       videoId: videoId,
@@ -101,13 +108,20 @@ export async function POST(request: NextRequest) {
       thumbnailUrl: thumbnailUrl,
       duration: duration,
       transcript: fullText,
+      description: videoAnalysis.description,
+      qaPairs: videoAnalysis.qaPairs,
     });
 
     await video.save();
 
     // Process transcript for RAG (vector embeddings)
     try {
-      await processTranscriptForRAG(fullText, videoId, videoTitle, payload.userId);
+      await processTranscriptForRAG(
+        fullText,
+        videoId,
+        videoTitle,
+        payload.userId
+      );
       console.log("Successfully processed transcript for RAG.");
     } catch (ragError) {
       console.error("Error processing transcript for RAG:", ragError);
@@ -115,14 +129,17 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("Successfully transcribed and stored in database.");
-    return new Response(JSON.stringify({ 
-      transcript: fullText,
-      videoId: videoId,
-      videoTitle: videoTitle 
-    }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        transcript: fullText,
+        videoId: videoId,
+        videoTitle: videoTitle,
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   } catch (err) {
     console.error(err);
     return new Response(
