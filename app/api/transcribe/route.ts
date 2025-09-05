@@ -3,7 +3,7 @@ import connectDB from "@/lib/mongodb";
 import Video from "@/models/Video";
 import { NextRequest } from "next/server";
 import { getTokenFromCookies, verifyToken } from "@/lib/auth";
-import { processTranscriptForRAG } from "@/lib/vectorStore";
+import { processTranscriptForRAG, processCommentsForRAG } from "@/lib/vectorStore";
 import { analyzeVideo } from "@/lib/videoAnalysisService";
 import { analyzeComments } from "@/lib/youtubeCommentsService";
 
@@ -159,6 +159,22 @@ export async function POST(request: NextRequest) {
     } catch (ragError) {
       console.error("Error processing transcript for RAG:", ragError);
       // Don't fail the entire request if RAG processing fails
+    }
+
+    // Process comments for RAG (vector embeddings)
+    try {
+      if (analyzedComments.length > 0) {
+        await processCommentsForRAG(
+          analyzedComments,
+          videoId,
+          videoTitle,
+          payload.userId
+        );
+        console.log("Successfully processed comments for RAG.");
+      }
+    } catch (commentsRagError) {
+      console.error("Error processing comments for RAG:", commentsRagError);
+      // Don't fail the entire request if comments RAG processing fails
     }
 
     console.log("Successfully transcribed and stored in database.");

@@ -109,6 +109,7 @@ export async function processTranscriptForRAG(
           videoId,
           videoTitle,
           userId,
+          type: "transcript",
         },
       ]
     );
@@ -121,6 +122,61 @@ export async function processTranscriptForRAG(
     );
   } catch (error) {
     console.error("Error processing transcript for RAG:", error);
+    throw error;
+  }
+}
+
+export async function processCommentsForRAG(
+  comments: Array<{
+    text: string;
+    sentiment: 'positive' | 'negative' | 'neutral';
+    author: string;
+    likeCount: number;
+    publishedAt: Date;
+  }>,
+  videoId: string,
+  videoTitle: string,
+  userId: string
+): Promise<void> {
+  try {
+    if (!comments || comments.length === 0) {
+      console.log("No comments to process for RAG");
+      return;
+    }
+
+    // Create documents for each comment
+    const commentDocs = comments.map(comment => {
+      // Create a rich text representation of the comment for better search
+      const commentContent = `
+Comment: ${comment.text}
+Author: ${comment.author}
+Sentiment: ${comment.sentiment}
+Likes: ${comment.likeCount}
+Date: ${comment.publishedAt.toISOString()}
+Video: ${videoTitle}
+      `.trim();
+
+      return new Document({
+        pageContent: commentContent,
+        metadata: {
+          videoId: videoId,
+          videoTitle: videoTitle,
+          userId: userId,
+          type: "comment",
+          sentiment: comment.sentiment,
+          author: comment.author,
+          likeCount: comment.likeCount,
+          publishedAt: comment.publishedAt.toISOString(),
+          originalText: comment.text,
+        },
+      });
+    });
+
+    // Add comment documents to vector store
+    await addDocumentsToVectorStore(commentDocs, userId);
+    console.log(`Successfully processed ${commentDocs.length} comments for RAG`);
+  } catch (error) {
+    console.error("Error processing comments for RAG:", error);
     throw error;
   }
 }

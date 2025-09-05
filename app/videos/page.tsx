@@ -787,6 +787,8 @@ export default function VideosPage() {
               <div className="card ai-glow max-w-5xl w-full h-[700px] overflow-hidden">
                 <CommentsAnalysis
                   comments={commentsModal.video.comments || []}
+                  videoId={commentsModal.video.videoId}
+                  videoTitle={commentsModal.video.videoTitle}
                   onClose={handleCommentsClose}
                 />
               </div>
