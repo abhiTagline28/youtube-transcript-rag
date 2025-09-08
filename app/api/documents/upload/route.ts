@@ -6,8 +6,7 @@ import {
   extractTextFromFile, 
   analyzeDocument, 
   validateFileType, 
-  validateFileSize,
-  cleanupFile 
+  validateFileSize
 } from "@/lib/documentProcessingService";
 import { processDocumentForRAG } from "@/lib/vectorStore";
 import { put, del } from "@vercel/blob";
