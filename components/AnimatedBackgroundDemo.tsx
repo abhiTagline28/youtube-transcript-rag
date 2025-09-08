@@ -223,3 +223,4 @@ const HolographicGridAnimation = () => (
 );
 
 export default AnimatedBackgroundDemo;
+

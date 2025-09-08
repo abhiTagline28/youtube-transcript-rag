@@ -4,10 +4,10 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { Document } from "@langchain/core/documents";
 
 // Initialize embeddings
-const embeddings = new GoogleGenerativeAIEmbeddings({
+const embeddings = process.env.GOOGLE_API_KEY ? new GoogleGenerativeAIEmbeddings({
   apiKey: process.env.GOOGLE_API_KEY,
   model: "models/embedding-001",
-});
+}) : null;
 
 // Initialize text splitter
 const textSplitter = new RecursiveCharacterTextSplitter({
@@ -19,26 +19,42 @@ const textSplitter = new RecursiveCharacterTextSplitter({
 let vectorStore: Chroma | null = null;
 
 export async function getVectorStore(): Promise<Chroma> {
+  if (!embeddings) {
+    throw new Error("Google API key not configured. Please set GOOGLE_API_KEY environment variable.");
+  }
+  
   if (!vectorStore) {
     try {
+      console.log("Connecting to ChromaDB...");
       // Try to connect to existing collection
       vectorStore = await Chroma.fromExistingCollection(embeddings, {
         collectionName: "youtube-transcripts",
         url: process.env.CHROMA_URL || "http://localhost:8000",
       });
-    } catch {
-      console.log("Collection doesn't exist, creating new one...");
-      // If collection doesn't exist, create a new one
-      vectorStore = await Chroma.fromDocuments([], embeddings, {
-        collectionName: "youtube-transcripts",
-        url: process.env.CHROMA_URL || "http://localhost:8000",
-      });
+      console.log("Connected to existing ChromaDB collection");
+    } catch (error) {
+      console.log("Collection doesn't exist, creating new one...", error);
+      try {
+        // If collection doesn't exist, create a new one
+        vectorStore = await Chroma.fromDocuments([], embeddings, {
+          collectionName: "youtube-transcripts",
+          url: process.env.CHROMA_URL || "http://localhost:8000",
+        });
+        console.log("Created new ChromaDB collection");
+      } catch (createError) {
+        console.error("Failed to create ChromaDB collection:", createError);
+        throw createError;
+      }
     }
   }
   return vectorStore;
 }
 
 export async function createVectorStore(): Promise<Chroma> {
+  if (!embeddings) {
+    throw new Error("Google API key not configured. Please set GOOGLE_API_KEY environment variable.");
+  }
+  
   vectorStore = await Chroma.fromDocuments([], embeddings, {
     collectionName: "youtube-transcripts",
     url: process.env.CHROMA_URL || "http://localhost:8000",
@@ -122,6 +138,51 @@ export async function processTranscriptForRAG(
     );
   } catch (error) {
     console.error("Error processing transcript for RAG:", error);
+    throw error;
+  }
+}
+
+export async function processDocumentForRAG(
+  extractedText: string,
+  documentId: string,
+  fileName: string,
+  userId: string
+): Promise<void> {
+  try {
+    console.log(`Starting RAG processing for document: ${fileName}`);
+    
+    // Split document into chunks
+    console.log("Splitting document into chunks...");
+    const docs = await textSplitter.createDocuments(
+      [extractedText],
+      [
+        {
+          documentId,
+          fileName,
+          userId,
+          type: "document",
+        },
+      ]
+    );
+
+    console.log(`Document split into ${docs.length} chunks`);
+
+    // Add to vector store
+    console.log("Adding documents to vector store...");
+    await addDocumentsToVectorStore(docs, userId);
+
+    console.log(
+      `Successfully processed document ${fileName} with ${docs.length} chunks`
+    );
+  } catch (error) {
+    console.error("Error processing document for RAG:", error);
+    console.error("RAG error details:", {
+      documentId,
+      fileName,
+      userId,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined
+    });
     throw error;
   }
 }

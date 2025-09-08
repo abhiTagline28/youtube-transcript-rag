@@ -2,11 +2,11 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { searchSimilarDocuments } from "./vectorStore";
 
 // Initialize the LLM
-const llm = new ChatGoogleGenerativeAI({
+const llm = process.env.GOOGLE_API_KEY ? new ChatGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
   model: "gemini-1.5-flash",
   temperature: 0.3,
-});
+}) : null;
 
 export interface CommentsRAGResponse {
   answer: string;

@@ -2,11 +2,11 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { PromptTemplate } from "@langchain/core/prompts";
 
 // Initialize the LLM
-const llm = new ChatGoogleGenerativeAI({
+const llm = process.env.GOOGLE_API_KEY ? new ChatGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
   model: "gemini-1.5-flash",
   temperature: 0.3,
-});
+}) : null;
 
 // Prompt for sentiment analysis
 const SENTIMENT_PROMPT = PromptTemplate.fromTemplate(`
