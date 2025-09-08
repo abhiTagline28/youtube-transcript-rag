@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { getTokenFromCookies, verifyToken } from "@/lib/auth";
-import { askQuestion, askQuestionAboutSpecificVideo } from "@/lib/ragService";
+import { askQuestionAboutComments, getCommentInsights } from "@/lib/commentsRagService";
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { question, videoId, maxResults } = await request.json();
+    const { question, videoId, type = "question" } = await request.json();
 
-    if (!question || typeof question !== "string" || question.trim().length === 0) {
+    if (!question || !videoId) {
       return new Response(
-        JSON.stringify({ error: "Question is required and must be a non-empty string" }),
+        JSON.stringify({ error: "Question and videoId are required" }),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
@@ -39,41 +39,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate maxResults if provided
-    const resultsLimit = maxResults && typeof maxResults === "number" && maxResults > 0 && maxResults <= 10 
-      ? maxResults 
-      : 4;
-
     let response;
-    
-    if (videoId && typeof videoId === "string") {
-      // Ask question about specific video
-      response = await askQuestionAboutSpecificVideo(
-        question.trim(),
-        videoId,
-        payload.userId,
-        resultsLimit
-      );
+
+    if (type === "insights") {
+      // Get comment insights
+      response = await getCommentInsights(videoId, payload.userId);
     } else {
-      // Ask question across all videos
-      response = await askQuestion(
-        question.trim(),
-        payload.userId,
-        resultsLimit
-      );
+      // Ask question about comments
+      response = await askQuestionAboutComments(question, videoId, payload.userId);
     }
 
     return new Response(JSON.stringify(response), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error("Error in chat API:", err);
+
+  } catch (error) {
+    console.error("Error in comments chat API:", error);
     return new Response(
-      JSON.stringify({
-        error: `Failed to process question: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
+      JSON.stringify({ 
+        error: "Failed to process comment analysis request",
+        details: error instanceof Error ? error.message : "Unknown error"
       }),
       {
         status: 500,
@@ -82,5 +68,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-

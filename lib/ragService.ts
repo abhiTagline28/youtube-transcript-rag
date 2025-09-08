@@ -3,11 +3,11 @@ import { PromptTemplate } from "@langchain/core/prompts";
 import { searchSimilarDocuments } from "./vectorStore";
 
 // Initialize the LLM
-const llm = new ChatGoogleGenerativeAI({
+const llm = process.env.GOOGLE_API_KEY ? new ChatGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
   model: "gemini-1.5-flash",
   temperature: 0.7,
-});
+}) : null;
 
 // Create a prompt template for RAG
 const RAG_PROMPT = PromptTemplate.fromTemplate(`

@@ -9,6 +9,9 @@ interface Stats {
   totalVideos: number;
   totalDuration: number;
   totalWords: number;
+  totalDocuments: number;
+  documentWords: number;
+  documentPages: number;
 }
 
 export default function Home() {
@@ -17,6 +20,9 @@ export default function Home() {
     totalVideos: 0,
     totalDuration: 0,
     totalWords: 0,
+    totalDocuments: 0,
+    documentWords: 0,
+    documentPages: 0,
   });
   const [statsLoading, setStatsLoading] = useState(false);
 
@@ -29,14 +35,26 @@ export default function Home() {
   const fetchStats = async () => {
     try {
       setStatsLoading(true);
-      const response = await fetch("/api/stats", {
-        credentials: "include", // Include cookies in the request
-      });
-      const data = await response.json();
+      const [videoStatsResponse, documentStatsResponse] = await Promise.all([
+        fetch("/api/stats", { credentials: "include" }),
+        fetch("/api/documents/stats", { credentials: "include" }),
+      ]);
 
-      if (response.ok) {
-        setStats(data.stats);
-      }
+      const videoStats = videoStatsResponse.ok
+        ? await videoStatsResponse.json()
+        : { stats: {} };
+      const documentStats = documentStatsResponse.ok
+        ? await documentStatsResponse.json()
+        : { stats: {} };
+
+      setStats({
+        totalVideos: videoStats.stats.totalVideos || 0,
+        totalDuration: videoStats.stats.totalDuration || 0,
+        totalWords: videoStats.stats.totalWords || 0,
+        totalDocuments: documentStats.stats.totalDocuments || 0,
+        documentWords: documentStats.stats.totalWords || 0,
+        documentPages: documentStats.stats.totalPages || 0,
+      });
     } catch (err) {
       console.error("Failed to fetch stats:", err);
     } finally {
@@ -86,7 +104,7 @@ export default function Home() {
             </div>
 
             {/* Main Action Cards */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
               {/* Upload & Transcribe */}
               <Link
                 href="/upload"
@@ -143,6 +161,36 @@ export default function Home() {
                   </h3>
                   <p className="text-gray-400 text-sm">
                     Browse and manage your transcribed video collection
+                  </p>
+                </div>
+              </Link>
+
+              {/* Documents */}
+              <Link
+                href="/documents"
+                className="card ai-glow group hover:scale-105 transition-all duration-300"
+              >
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Documents
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    Upload and chat with PDF and DOC files
                   </p>
                 </div>
               </Link>
@@ -208,7 +256,7 @@ export default function Home() {
               <h3 className="text-2xl font-bold text-white mb-8 text-center">
                 Your Content Overview
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
                 <div className="text-center p-6 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl border border-indigo-500/30">
                   <div className="text-4xl font-bold gradient-text mb-2">
                     {statsLoading ? (
@@ -241,9 +289,41 @@ export default function Home() {
                       stats.totalWords.toLocaleString()
                     )}
                   </div>
-                  <div className="text-gray-300 font-medium">
-                    Words Transcribed
+                  <div className="text-gray-300 font-medium">Video Words</div>
+                </div>
+                <div className="text-center p-6 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-xl border border-amber-500/30">
+                  <div className="text-4xl font-bold gradient-text mb-2">
+                    {statsLoading ? (
+                      <div className="spinner mx-auto"></div>
+                    ) : (
+                      stats.totalDocuments
+                    )}
                   </div>
+                  <div className="text-gray-300 font-medium">
+                    Documents Uploaded
+                  </div>
+                </div>
+                <div className="text-center p-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-500/30">
+                  <div className="text-4xl font-bold gradient-text mb-2">
+                    {statsLoading ? (
+                      <div className="spinner mx-auto"></div>
+                    ) : (
+                      stats.documentWords.toLocaleString()
+                    )}
+                  </div>
+                  <div className="text-gray-300 font-medium">
+                    Document Words
+                  </div>
+                </div>
+                <div className="text-center p-6 bg-gradient-to-br from-red-500/20 to-rose-500/20 rounded-xl border border-red-500/30">
+                  <div className="text-4xl font-bold gradient-text mb-2">
+                    {statsLoading ? (
+                      <div className="spinner mx-auto"></div>
+                    ) : (
+                      stats.documentPages
+                    )}
+                  </div>
+                  <div className="text-gray-300 font-medium">Total Pages</div>
                 </div>
               </div>
             </div>
