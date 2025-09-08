@@ -22,6 +22,9 @@ PINECONE_INDEX=your-pinecone-index-name
 # Optional: keep per-user isolation or default namespace
 PINECONE_NAMESPACE=youtube-transcripts
 
+# Vercel Blob (for file storage)
+BLOB_READ_WRITE_TOKEN=your-vercel-blob-token
+
 # YouTube API Key (optional, for YouTube features)
 YOUTUBE_API_KEY=your-youtube-api-key-here
 ```
