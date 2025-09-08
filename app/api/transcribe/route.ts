@@ -1,12 +1,15 @@
 import { YoutubeLoader } from "@langchain/community/document_loaders/web/youtube";
 
 // Increase execution time for this route on Vercel (Next.js App Router)
-export const maxDuration = 60;
+export const maxDuration = 300;
 import connectDB from "@/lib/mongodb";
 import Video from "@/models/Video";
 import { NextRequest } from "next/server";
 import { getTokenFromCookies, verifyToken } from "@/lib/auth";
-import { processTranscriptForRAG, processCommentsForRAG } from "@/lib/vectorStore";
+import {
+  processTranscriptForRAG,
+  processCommentsForRAG,
+} from "@/lib/vectorStore";
 import { analyzeVideo } from "@/lib/videoAnalysisService";
 import { analyzeComments } from "@/lib/youtubeCommentsService";
 
@@ -109,7 +112,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Analyze comments (optional, can be done in background)
-    let analyzedComments: Array<{ text: string; sentiment: 'positive' | 'negative' | 'neutral'; author: string; likeCount: number; publishedAt: Date; } > = [];
+    let analyzedComments: Array<{
+      text: string;
+      sentiment: "positive" | "negative" | "neutral";
+      author: string;
+      likeCount: number;
+      publishedAt: Date;
+    }> = [];
     try {
       console.log(`Starting comment analysis for video: ${videoId}`);
       analyzedComments = await analyzeComments(videoId);
