@@ -1,4 +1,5 @@
-import { Chroma } from "@langchain/community/vectorstores/chroma";
+import { Pinecone } from "@pinecone-database/pinecone";
+import { PineconeStore } from "@langchain/pinecone";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { Document } from "@langchain/core/documents";
@@ -16,48 +17,61 @@ const textSplitter = new RecursiveCharacterTextSplitter({
 });
 
 // Vector store instance
-let vectorStore: Chroma | null = null;
+let vectorStore: PineconeStore | null = null;
 
-export async function getVectorStore(): Promise<Chroma> {
+function getRequiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
+let pineconeClient: Pinecone | null = null;
+function getPineconeClient(): Pinecone {
+  if (!pineconeClient) {
+    const apiKey = getRequiredEnv("PINECONE_API_KEY");
+    pineconeClient = new Pinecone({ apiKey });
+  }
+  return pineconeClient;
+}
+
+export async function getVectorStore(): Promise<PineconeStore> {
   if (!embeddings) {
     throw new Error("Google API key not configured. Please set GOOGLE_API_KEY environment variable.");
   }
-  
+
   if (!vectorStore) {
-    try {
-      console.log("Connecting to ChromaDB...");
-      // Try to connect to existing collection
-      vectorStore = await Chroma.fromExistingCollection(embeddings, {
-        collectionName: "youtube-transcripts",
-        url: process.env.CHROMA_URL || "http://localhost:8000",
-      });
-      console.log("Connected to existing ChromaDB collection");
-    } catch (error) {
-      console.log("Collection doesn't exist, creating new one...", error);
-      try {
-        // If collection doesn't exist, create a new one
-        vectorStore = await Chroma.fromDocuments([], embeddings, {
-          collectionName: "youtube-transcripts",
-          url: process.env.CHROMA_URL || "http://localhost:8000",
-        });
-        console.log("Created new ChromaDB collection");
-      } catch (createError) {
-        console.error("Failed to create ChromaDB collection:", createError);
-        throw createError;
-      }
-    }
+    const indexName = getRequiredEnv("PINECONE_INDEX");
+    const namespace = process.env.PINECONE_NAMESPACE || "youtube-transcripts";
+
+    console.log("Connecting to Pinecone index...", { indexName, namespace });
+    const client = getPineconeClient();
+    const index = client.index(indexName);
+
+    // Connect to existing index/namespace
+    vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+      pineconeIndex: index,
+      namespace,
+    });
+    console.log("Connected to Pinecone index successfully");
   }
   return vectorStore;
 }
 
-export async function createVectorStore(): Promise<Chroma> {
+export async function createVectorStore(): Promise<PineconeStore> {
   if (!embeddings) {
     throw new Error("Google API key not configured. Please set GOOGLE_API_KEY environment variable.");
   }
-  
-  vectorStore = await Chroma.fromDocuments([], embeddings, {
-    collectionName: "youtube-transcripts",
-    url: process.env.CHROMA_URL || "http://localhost:8000",
+
+  const indexName = getRequiredEnv("PINECONE_INDEX");
+  const namespace = process.env.PINECONE_NAMESPACE || "youtube-transcripts";
+  const client = getPineconeClient();
+  const index = client.index(indexName);
+
+  vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+    pineconeIndex: index,
+    namespace,
   });
   return vectorStore;
 }

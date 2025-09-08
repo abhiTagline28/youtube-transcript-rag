@@ -16,8 +16,14 @@ JWT_SECRET=your-secret-key-change-in-production
 # Google API Key for document processing and RAG
 GOOGLE_API_KEY=your-google-api-key-here
 
-# ChromaDB URL (optional, defaults to localhost:8000)
-CHROMA_URL=http://localhost:8000
+# Pinecone (managed vector DB)
+PINECONE_API_KEY=your-pinecone-api-key
+PINECONE_INDEX=your-pinecone-index-name
+# Optional: keep per-user isolation or default namespace
+PINECONE_NAMESPACE=youtube-transcripts
+
+# Vercel Blob (for file storage)
+BLOB_READ_WRITE_TOKEN=your-vercel-blob-token
 
 # YouTube API Key (optional, for YouTube features)
 YOUTUBE_API_KEY=your-youtube-api-key-here
@@ -43,4 +49,4 @@ YOUTUBE_API_KEY=your-youtube-api-key-here
 1. Restart your development server: `npm run dev`
 2. Try uploading a document again
 
-The upload should now work properly with proper error handling and fallbacks for missing API keys.
+The upload should now work properly with proper error handling and fallbacks for missing API keys. For production, use Pinecone instead of local Chroma; set the Pinecone variables above in Vercel.

@@ -8,7 +8,10 @@
     "MONGODB_URI": "@mongodb_uri",
     "JWT_SECRET": "@jwt_secret",
     "GOOGLE_API_KEY": "@google_api_key",
-    "CHROMA_URL": "@chroma_url"
+    "PINECONE_API_KEY": "@pinecone_api_key",
+    "PINECONE_INDEX": "@pinecone_index",
+    "PINECONE_NAMESPACE": "@pinecone_namespace",
+    "BLOB_READ_WRITE_TOKEN": "@blob_read_write_token"
   }
 }
 

@@ -154,16 +154,52 @@ export async function extractTextFromDOC(filePath: string): Promise<{
   }
 }
 
-export async function extractTextFromFile(filePath: string, fileType: 'pdf' | 'doc' | 'docx'): Promise<{
+// Helper function to download blob content
+async function downloadBlobContent(url: string): Promise<Buffer> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to download blob: ${response.statusText}`);
+  }
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
+}
+
+export async function extractTextFromFile(filePathOrUrl: string, fileType: 'pdf' | 'doc' | 'docx'): Promise<{
   text: string;
   pageCount?: number;
 }> {
+  // Check if it's a blob URL (starts with https://)
+  if (filePathOrUrl.startsWith('https://')) {
+    console.log(`Processing blob URL: ${filePathOrUrl}`);
+    const buffer = await downloadBlobContent(filePathOrUrl);
+    
+    // Create a temporary file for processing
+    const tempPath = `/tmp/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileType}`;
+    fs.writeFileSync(tempPath, buffer);
+    
+    try {
+      const result = await extractTextFromFile(tempPath, fileType);
+      // Clean up temp file
+      fs.unlinkSync(tempPath);
+      return result;
+    } catch (error) {
+      // Clean up temp file on error
+      try {
+        fs.unlinkSync(tempPath);
+      } catch (cleanupError) {
+        console.warn('Failed to clean up temp file:', cleanupError);
+      }
+      throw error;
+    }
+  }
+  
+  // Original logic for local files
   switch (fileType) {
     case 'pdf':
-      return await extractTextFromPDF(filePath);
+      return await extractTextFromPDF(filePathOrUrl);
     case 'doc':
     case 'docx':
-      return await extractTextFromDOC(filePath);
+      return await extractTextFromDOC(filePathOrUrl);
     default:
       throw new Error(`Unsupported file type: ${fileType}`);
   }

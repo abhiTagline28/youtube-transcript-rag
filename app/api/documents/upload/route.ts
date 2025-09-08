@@ -10,9 +10,7 @@ import {
   cleanupFile 
 } from "@/lib/documentProcessingService";
 import { processDocumentForRAG } from "@/lib/vectorStore";
-import { writeFile, mkdir } from "fs/promises";
-import fs from "fs";
-import path from "path";
+import { put, del } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: NextRequest) {
@@ -115,39 +113,33 @@ export async function POST(request: NextRequest) {
     }
     console.log("No existing document found");
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(process.cwd(), "uploads", "documents");
-    await mkdir(uploadsDir, { recursive: true });
-
     // Generate unique filename
-    const fileExtension = path.extname(file.name);
-    const uniqueFileName = `${uuidv4()}${fileExtension}`;
-    const filePath = path.join(uploadsDir, uniqueFileName);
+    const fileExtension = file.name.split('.').pop() || '';
+    const uniqueFileName = `${uuidv4()}.${fileExtension}`;
 
-    // Save file to disk
-    console.log(`Saving file to: ${filePath}`);
+    // Upload file to Vercel Blob
+    console.log(`Uploading file to Vercel Blob: ${uniqueFileName}`);
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
     
-    // Verify file was saved
-    if (!fs.existsSync(filePath)) {
-      throw new Error("Failed to save file to disk");
-    }
+    const blob = await put(uniqueFileName, buffer, {
+      access: 'public',
+      contentType: file.type,
+    });
     
-    const savedFileSize = fs.statSync(filePath).size;
-    console.log(`File saved successfully. Size: ${savedFileSize} bytes`);
+    console.log(`File uploaded successfully to: ${blob.url}`);
 
     try {
-      console.log(`Starting document processing for file: ${file.name}, type: ${fileType}, path: ${filePath}`);
+      console.log(`Starting document processing for file: ${file.name}, type: ${fileType}, url: ${blob.url}`);
       
-      // Extract text from document
-      const { text: extractedText, pageCount } = await extractTextFromFile(filePath, fileType);
+      // Extract text from document using blob URL
+      const { text: extractedText, pageCount } = await extractTextFromFile(blob.url, fileType);
 
       console.log(`Text extraction completed. Text length: ${extractedText?.length || 0}`);
 
       if (!extractedText || extractedText.trim().length === 0) {
-        await cleanupFile(filePath);
+        // Clean up blob if text extraction fails
+        await del(blob.url);
         return new Response(
           JSON.stringify({ 
             error: "Could not extract text from the document. The file might be corrupted or empty." 
@@ -184,7 +176,7 @@ export async function POST(request: NextRequest) {
         originalName: file.name,
         fileType,
         fileSize: file.size,
-        filePath,
+        filePath: blob.url, // Store blob URL instead of local path
         extractedText,
         pageCount,
         wordCount: analysis.wordCount,
@@ -233,8 +225,12 @@ export async function POST(request: NextRequest) {
         }
       );
     } catch (processingError) {
-      // Clean up file if processing fails
-      await cleanupFile(filePath);
+      // Clean up blob if processing fails
+      try {
+        await del(blob.url);
+      } catch (delError) {
+        console.warn("Failed to delete blob:", delError);
+      }
       console.error("Error processing document:", processingError);
       throw processingError;
     }
