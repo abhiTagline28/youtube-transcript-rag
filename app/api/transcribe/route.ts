@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     let videoAnalysis;
     try {
       videoAnalysis = await analyzeVideo(videoTitle, fullText, duration);
-    } catch (analysisError) {
+    } catch {
       // Continue without analysis if it fails
       videoAnalysis = {
         description: "",
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Analyze comments (optional, can be done in background)
-    let analyzedComments = [];
+    let analyzedComments: Array<{ text: string; sentiment: 'positive' | 'negative' | 'neutral'; author: string; likeCount: number; publishedAt: Date; } > = [];
     try {
       console.log(`Starting comment analysis for video: ${videoId}`);
       analyzedComments = await analyzeComments(videoId);

@@ -5,7 +5,7 @@ import Video from "@/models/Video";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication
@@ -31,7 +31,7 @@ export async function GET(
       );
     }
 
-    const videoId = params.id;
+    const { id: videoId } = await params;
 
     if (!videoId) {
       return new Response(

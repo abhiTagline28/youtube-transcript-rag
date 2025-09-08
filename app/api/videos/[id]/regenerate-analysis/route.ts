@@ -6,7 +6,7 @@ import { analyzeVideo } from "@/lib/videoAnalysisService";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication
@@ -32,7 +32,7 @@ export async function POST(
       );
     }
 
-    const videoId = params.id;
+    const { id: videoId } = await params;
 
     if (!videoId) {
       return new Response(
