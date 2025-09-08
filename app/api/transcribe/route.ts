@@ -1,4 +1,7 @@
 import { YoutubeLoader } from "@langchain/community/document_loaders/web/youtube";
+
+// Increase execution time for this route on Vercel (Next.js App Router)
+export const maxDuration = 60;
 import connectDB from "@/lib/mongodb";
 import Video from "@/models/Video";
 import { NextRequest } from "next/server";
